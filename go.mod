@@ -3,6 +3,7 @@ module github.com/fernandojec/assignment-2
 go 1.20
 
 require (
+	github.com/caarlos0/env/v9 v9.0.0
 	github.com/gofiber/fiber/v2 v2.47.0
 	github.com/jmoiron/sqlx v1.3.5
 	github.com/joho/godotenv v1.5.1
@@ -18,8 +19,6 @@ require (
 	github.com/go-playground/universal-translator v0.18.1 // indirect
 	github.com/gofiber/template v1.8.2 // indirect
 	github.com/gofiber/utils v1.1.0 // indirect
-	github.com/gorilla/securecookie v1.1.1 // indirect
-	github.com/gorilla/sessions v1.2.1 // indirect
 	github.com/leodido/go-urn v1.2.4 // indirect
 	golang.org/x/net v0.9.0 // indirect
 )

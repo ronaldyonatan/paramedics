@@ -57,6 +57,17 @@ func (r authRepo) InsertVerifyAuth(data verifyAuth) (err error) {
 	}
 	return
 }
+func (r authRepo) GetAuthByID(id uint) (data auth, err error) {
+	query := `select * from auths where id=$1`
+
+	_, err = r.db.Prepare(query)
+	if err != nil {
+		return auth{}, err
+	}
+	err = r.db.Get(&data, query, id)
+
+	return
+}
 func (r authRepo) GetAuthByEmail(email string) (data auth, err error) {
 	query := `select * from auths where email=$1`
 

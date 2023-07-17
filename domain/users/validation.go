@@ -10,8 +10,8 @@ type ErrorResponse struct {
 
 var validate = validator.New()
 
-func ValidateStruct(user interface{}) []*ErrorResponse {
-	var errors []*ErrorResponse
+func ValidateStruct(user interface{}) []ErrorResponse {
+	var errors []ErrorResponse
 	err := validate.Struct(user)
 	if err != nil {
 		for _, err := range err.(validator.ValidationErrors) {
@@ -19,7 +19,7 @@ func ValidateStruct(user interface{}) []*ErrorResponse {
 			element.FailedField = err.StructNamespace()
 			element.Tag = err.Tag()
 			element.Value = err.Param()
-			errors = append(errors, &element)
+			errors = append(errors, element)
 		}
 	}
 	return errors

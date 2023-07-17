@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/fernandojec/assignment-2/pkg/smtp"
-	"github.com/fernandojec/assignment-2/pkg/utils"
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -30,6 +29,7 @@ type writeAuthRepo interface {
 
 type readAuthRepo interface {
 	GetAuthByEmail(email string) (data auth, err error)
+	GetAuthByID(id uint) (data auth, err error)
 }
 
 type writeVerifyAuthRepo interface {
@@ -45,7 +45,7 @@ func NewService(repo repo) authService {
 	return authService{repo: repo}
 }
 
-func (s authService) CreateAuth(req authCreateRequest) (err error) {
+func (s authService) CreateAuth(req authCreateRequest, baseVerifyEmail string) (err error) {
 	dataAuth, err := s.repo.GetAuthByEmail(req.Email)
 	if err != nil && err != sql.ErrNoRows {
 		return err
@@ -79,9 +79,8 @@ func (s authService) CreateAuth(req authCreateRequest) (err error) {
 		To:      []string{req.Email},
 		Subject: "Registration Activation",
 		Body: fmt.Sprintf(
-			`<a href='%s%s/v1/auth/verify-email/%s'>Click here to activate your account</a>`,
-			utils.GetEnv("BASE_URL"),
-			utils.GetEnv("BASE_PORT"),
+			`<a href='%s%s'>Click here to activate your account</a>`,
+			baseVerifyEmail,
 			dataVerify.Token,
 		),
 	})
@@ -139,5 +138,42 @@ func (s authService) SignInAuth(req authSignInRequest) (data authSignInResponse,
 		return authSignInResponse{}, errors.New("user is not activated")
 	}
 	data = dataAuth.ConvertToAuthSignInResponse()
+	return
+}
+
+func (s authService) SendNewActivationLink(token string, baseVerifyEmail string) (err error) {
+	verifyAuthData, err := s.repo.GetVerifyAuthByToken(token)
+	if err != nil {
+		return err
+	}
+
+	dataAuth, err := s.repo.GetAuthByID(verifyAuthData.AuthId)
+
+	if err != nil {
+		return
+	}
+
+	dataVerify := verifyAuth{
+		AuthId:    verifyAuthData.AuthId,
+		Token:     uuid.New().String(),
+		CreatedAt: time.Now(),
+		ExpiredAt: time.Now().Add(10 * time.Minute),
+	}
+	err = s.repo.InsertVerifyAuth(dataVerify)
+	if err != nil {
+		return err
+	}
+
+	err = smtp.SendMail(smtp.Mail{
+		From:    "My APP Registration Confirmation",
+		To:      []string{dataAuth.Email},
+		Subject: "Registration Activation",
+		Body: fmt.Sprintf(
+			`<a href='%s%s'>Click here to activate your account</a>`,
+			baseVerifyEmail,
+			dataVerify.Token,
+		),
+	})
+
 	return
 }

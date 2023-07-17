@@ -3,17 +3,19 @@ package main
 import (
 	"log"
 
+	"github.com/fernandojec/assignment-2/config"
 	"github.com/fernandojec/assignment-2/domain/users"
 	"github.com/fernandojec/assignment-2/pkg/dbconnect"
-	"github.com/fernandojec/assignment-2/pkg/utils"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/redirect"
+	"github.com/gofiber/fiber/v2/middleware/session"
 	"github.com/gofiber/template/html/v2"
-	"github.com/joho/godotenv"
 )
 
 func main() {
-	err := godotenv.Load("../../.env")
+	var err error
+	config.AppConfig, err = config.LoadConfig()
+	// err := godotenv.Load("../../.env")
 	// err = godotenv.Load(filepath.Join("./", ".env"))
 	if err != nil {
 		// fmt.Printf("Error load env:%v", err)
@@ -21,17 +23,19 @@ func main() {
 
 	}
 	dbx, err := dbconnect.ConnectSqlx(dbconnect.DBConfig{
-		Host:       utils.GetEnv("POSTGRES_HOST"),
-		Port:       utils.GetEnv("POSTGRES_PORT"),
-		Dbname:     utils.GetEnv("POSTGRES_DBNAME"),
-		Dbuser:     utils.GetEnv("POSTGRES_USER"),
-		Dbpassword: utils.GetEnv("POSTGRES_PASSWORD"),
-		Sslmode:    utils.GetEnv("POSTGRES_SSLMODE"),
+		Host:       config.AppConfig.Postgres.Host,
+		Port:       config.AppConfig.Postgres.Port,
+		Dbname:     config.AppConfig.Postgres.DbName,
+		Dbuser:     config.AppConfig.Postgres.User,
+		Dbpassword: config.AppConfig.Postgres.Password,
+		Sslmode:    config.AppConfig.Postgres.SSLMode,
 	})
 	if err != nil {
 		log.Fatalf("Cannot connect to DB:%v", err)
 	}
 
+	// store := sessions.NewCookieStore([]byte(config.AppConfig.Session.AuthSessionId))
+	store := session.New(session.ConfigDefault)
 	engine := html.New("../../views", ".html")
 
 	app := fiber.New(fiber.Config{
@@ -44,7 +48,7 @@ func main() {
 		StatusCode: 301,
 	}))
 	web := app.Group("web")
-	users.RouterWebInit(web, dbx)
+	users.RouterWebInit(web, dbx, store)
 
-	log.Fatal(app.Listen(":3001"))
+	log.Fatal(app.Listen(config.AppConfig.App.BaseWebPort))
 }

@@ -3,6 +3,7 @@ package users
 import (
 	"errors"
 
+	"github.com/fernandojec/assignment-2/config"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -13,7 +14,7 @@ type service interface {
 }
 
 type createAuthService interface {
-	CreateAuth(req authCreateRequest) (err error)
+	CreateAuth(req authCreateRequest, baseVerifyEmail string) (err error)
 }
 type activateAuthService interface {
 	ActivateAuth(token string) (err error)
@@ -41,7 +42,10 @@ func (h *handler) CreateAuth(c *fiber.Ctx) error {
 		return c.JSON(err)
 	}
 
-	err := h.svcAuth.CreateAuth(*req)
+	err := h.svcAuth.CreateAuth(
+		*req,
+		config.AppConfig.App.BaseUrl+config.AppConfig.App.BasePort+"/v1/auth/verify-email/",
+	)
 
 	if err != nil {
 		// return writeErrorResponse(c, echo.ErrInternalServerError.Code, err.Error())
