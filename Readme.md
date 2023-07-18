@@ -21,7 +21,7 @@
 Clone the project
 
 ```bash
-  git clone https://link-to-project
+  git clone https://github.com/fernandojec/assignment-2
 ```
 
 Migrate Database
