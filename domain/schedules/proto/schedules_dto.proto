@@ -1,0 +1,55 @@
+syntax="proto3";
+
+package schedules;
+option go_package="./domain/schedules";
+
+message scheduleCreateProto {
+    string healthcareid = 1;
+    string paramedicid = 2;
+    google.protobuf.Timestamp schedulestart = 3;
+    google.protobuf.Timestamp scheduleend = 4;
+    int32 duration = 5;
+    string usercreate = 6;
+}
+
+message scheduleProto {
+    string scheduleid = 1;
+    string healthcareid = 2;
+    string paramedicid = 3;
+    string schedulestart = 4;
+    string scheduleend = 5;
+    int32 duration = 6;
+}
+
+message scheduledetailProto {
+    int32 scheduleslotid = 1;
+    google.protobuf.Timestamp slottime = 2;
+    bool isbooked = 3;
+}
+
+
+message listscheduledetailProto {
+    repeated scheduledetailProto schedules = 1;
+}
+
+
+message findScheduleProto {
+    string healthcareid = 1;
+    string paramedicid = 2;
+    google.protobuf.Timestamp scheduledate = 3;
+}
+
+message setScheduleProto {
+    int32 scheduleslotid = 1;
+}
+
+import "google/protobuf/Empty.proto";
+import "google/protobuf/timestamp.proto";
+
+service Schedule {
+    rpc CreateSchedule(scheduleCreateProto) returns (scheduleProto) {}
+    rpc FindScheduleAll(findScheduleProto) returns (listscheduledetailProto) {}
+    rpc FindScheduleAvailable(findScheduleProto) returns (listscheduledetailProto) {}
+    rpc FindScheduleBooked(findScheduleProto) returns (listscheduledetailProto) {}
+    rpc BookSlot(setScheduleProto) returns (scheduledetailProto) {}
+}

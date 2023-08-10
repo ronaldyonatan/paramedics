@@ -1,0 +1,33 @@
+syntax="proto3";
+
+package paramedics;
+option go_package="./domain/paramedics";
+
+import "google/protobuf/Empty.proto";
+
+message paramedicCreateProto {
+    string firstname = 1;
+    string lastname = 2;
+    string email = 3;
+    string usercreate = 4;
+}
+
+message paramedicFindByHospitalProto {
+    string hospitalid = 1;
+}
+
+message paramedicProto {
+    string paramedicid = 1;
+    string firstname = 2;
+    string lastname = 3;
+    string email = 4;
+}
+
+message listparamedicProto {
+    repeated paramedicProto paramedics = 1;
+}
+
+service Paramedic {
+    rpc CreateParamedic(paramedicCreateProto) returns (paramedicProto) {}
+    rpc FindByHospital(paramedicFindByHospitalProto) returns (listparamedicProto) {}
+}

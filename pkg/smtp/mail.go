@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/fernandojec/assignment-2/pkg/utils"
+	"github.com/ronaldyonatan/paramedics/pkg/utils"
 	"gopkg.in/gomail.v2"
 )
 
